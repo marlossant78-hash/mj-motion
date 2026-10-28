@@ -1,0 +1,15 @@
+{
+  "name": "mj-motion",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MJ Motion - site de motion control com Kling 3.0 (fal.ai), Pix (Mercado Pago) e créditos",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@fal-ai/client": "^1.0.0",
+    "@upstash/redis": "^1.34.0",
+    "@vercel/blob": "latest"
+  }
+}

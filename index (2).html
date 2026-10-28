@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MJ Motion — Dê movimento a qualquer personagem</title>
+<meta name="description" content="Envie uma foto e um vídeo de referência. A IA transfere o movimento para o seu personagem. Pague por Pix.">
+<style>
+  :root{
+    --bg:#0b0b12; --card:#14141f; --line:#26263a; --text:#f2f2f8; --muted:#9a9ab3;
+    --accent:#7c5cff; --accent2:#22d3ee; --ok:#22c55e; --warn:#f59e0b; --err:#f87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5}
+  a{color:inherit}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+  .logo{font-weight:800;font-size:1.25rem;letter-spacing:.3px}
+  .logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .btn{display:inline-block;border:0;cursor:pointer;border-radius:12px;padding:12px 22px;font-weight:700;font-size:1rem;color:#fff;background:linear-gradient(90deg,var(--accent),#5b8cff);text-decoration:none}
+  .btn.ghost{background:transparent;border:1px solid var(--line)}
+  .btn.small{padding:8px 14px;font-size:.9rem}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .hero{text-align:center;padding:56px 0 40px}
+  .hero h1{font-size:clamp(2rem,6vw,3.4rem);line-height:1.1;margin-bottom:16px}
+  .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);max-width:620px;margin:0 auto 26px;font-size:1.1rem}
+  section{padding:36px 0}
+  h2{font-size:1.6rem;margin-bottom:6px}
+  .sub{color:var(--muted);margin-bottom:22px}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .card h3{margin-bottom:6px}
+  .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);font-weight:800;margin-bottom:10px}
+  .price{font-size:2rem;font-weight:800;margin:8px 0}
+  .card ul{list-style:none;color:var(--muted);margin:10px 0 16px}
+  .card ul li{padding:3px 0}
+  .card ul li::before{content:"✓ ";color:var(--ok)}
+  .tag{display:inline-block;font-size:.75rem;background:var(--accent);padding:2px 10px;border-radius:99px;margin-bottom:8px}
+  .app{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+  @media(max-width:760px){.app{grid-template-columns:1fr}}
+  .drop{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--muted)}
+  .drop input{margin-top:10px;max-width:100%}
+  .drop video,.drop img{max-width:100%;max-height:220px;border-radius:10px;margin-top:10px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .bal{font-weight:700}
+  .bal b{color:var(--accent2)}
+  #status{margin-top:14px;padding:12px;border-radius:10px;background:#0f0f18;border:1px solid var(--line);color:var(--muted);display:none}
+  #status.erro{color:var(--err);border-color:#5b2323}
+  #result video{width:100%;border-radius:12px;margin-top:12px}
+  .dicas{background:#0f1a1f;border:1px solid #17404d;color:#9bdcec;border-radius:12px;padding:14px 16px;font-size:.92rem;margin-bottom:16px}
+  .dicas b{color:#d3f3fb}
+  .dicas ul{margin:6px 0 0 18px}
+  .acesso{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:12px;font-size:.9rem;color:var(--muted)}
+  .acesso code{display:block;word-break:break-all;background:#0f0f18;border-radius:8px;padding:8px;margin:8px 0;color:var(--text);font-size:.8rem}
+  .acesso input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f0f18;color:var(--text);margin:8px 0}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:.9rem;text-align:center;margin-top:30px}
+  dialog{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:400px;width:92%}
+  dialog::backdrop{background:rgba(0,0,0,.7)}
+  dialog input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0f0f18;color:var(--text);margin:10px 0}
+  .qr{word-break:break-all;background:#0f0f18;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:.8rem;color:var(--muted);margin:10px 0}
+  .qrimg{display:block;margin:10px auto;width:200px;height:200px;background:#fff;border-radius:10px;padding:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">MJ <span>Motion</span></div>
+    <a class="btn ghost small" href="#criar">Criar vídeo</a>
+  </header>
+
+  <div class="hero">
+    <h1>Dê <em>movimento</em> a qualquer personagem</h1>
+    <p>Envie uma foto e um vídeo de referência. Nossa IA copia os movimentos e gera um vídeo novo com o seu personagem. Pague por Pix, sem assinatura.</p>
+    <a class="btn" href="#planos">Ver pacotes</a>
+  </div>
+
+  <section>
+    <h2>Como funciona</h2>
+    <p class="sub">Três passos, sem instalar nada.</p>
+    <div class="grid g3">
+      <div class="card"><div class="num">1</div><h3>Envie a imagem</h3><p style="color:var(--muted)">Foto do personagem, de corpo inteiro ou meio corpo, com boa nitidez.</p></div>
+      <div class="card"><div class="num">2</div><h3>Envie o vídeo de referência</h3><p style="color:var(--muted)">O movimento que você quer copiar. Quanto mais simples, melhor o resultado.</p></div>
+      <div class="card"><div class="num">3</div><h3>Baixe o resultado</h3><p style="color:var(--muted)">A IA gera o vídeo e você baixa direto no celular ou computador.</p></div>
+    </div>
+  </section>
+
+  <section id="planos">
+    <h2>Pacotes de créditos</h2>
+    <p class="sub">Pague por Pix e use quando quiser. Cada vídeo gasta 1 crédito.</p>
+    <div class="grid g3" id="pacotes"><p class="sub">Carregando pacotes...</p></div>
+  </section>
+
+  <section id="criar">
+    <div class="row" style="margin-bottom:14px">
+      <h2>Criar vídeo</h2>
+      <div class="bal">Seus créditos: <b id="creditos">0</b></div>
+    </div>
+
+    <div class="dicas">
+      <b>Para o melhor resultado:</b>
+      <ul>
+        <li><b>Imagem:</b> nítida, bem iluminada, personagem visível e mãos sem cortes.</li>
+        <li><b>Vídeo:</b> uma pessoa só, câmera parada, sem cortes e com o corpo enquadrado. Máximo de <span id="maxSeg">5</span> segundos (MP4 ou MOV).</li>
+        <li>A proporção do corpo na imagem deve parecer com a de quem aparece no vídeo.</li>
+      </ul>
+    </div>
+
+    <div class="app">
+      <div class="card">
+        <h3>1. Imagem do personagem</h3>
+        <div class="drop">
+          <div>JPG, PNG ou WEBP</div>
+          <input type="file" id="img" accept="image/jpeg,image/png,image/webp">
+          <div id="imgPrev"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>2. Vídeo de referência</h3>
+        <div class="drop">
+          <div>MP4 ou MOV de até <span class="maxSegTxt">5</span> segundos</div>
+          <input type="file" id="vid" accept="video/mp4,video/quicktime">
+          <div id="vidPrev"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn" id="gerar">Gerar vídeo (1 crédito)</button>
+    </div>
+    <div id="status"></div>
+    <div id="result"></div>
+
+    <div class="acesso">
+      <b style="color:var(--text)">Seu código de acesso</b> — guarde para não perder seus créditos se trocar de aparelho.
+      <code id="codigo">Você ainda não tem um código. Ele aparece depois da primeira compra.</code>
+      <button class="btn ghost small" id="copiarCodigo" style="display:none">Copiar código</button>
+      <div style="margin-top:12px">Já comprou antes? Cole seu código:</div>
+      <input type="text" id="codigoEntrada" placeholder="Cole o código de acesso aqui">
+      <button class="btn ghost small" id="entrar">Entrar com código</button>
+    </div>
+  </section>
+
+  <footer>
+    © MJ Motion. Envie apenas imagens e vídeos que você tem direito de usar. Não é permitido imitar pessoas sem autorização.
+  </footer>
+</div>
+
+<dialog id="pixDlg">
+  <h3 id="pixTitulo">Pagar com Pix</h3>
+  <div id="pixPasso1">
+    <p style="color:var(--muted)">Informe seu e-mail para gerar o Pix.</p>
+    <input type="email" id="email" placeholder="seu@email.com">
+  </div>
+  <div id="pixArea"></div>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="pixGerar">Gerar Pix</button>
+    <button class="btn ghost" id="pixFechar">Fechar</button>
+  </div>
+</dialog>
+
+<script type="module">
+import { upload } from 'https://esm.sh/@vercel/blob/client';
+
+const $ = id => document.getElementById(id);
+const CHAVE = 'mj_token';
+let pacoteAtual = null;
+let maxSegundos = 5;
+let sondaPix = null;
+
+/* ---------- código de acesso (guardado no navegador) ---------- */
+const lerToken = () => { try { return localStorage.getItem(CHAVE) || ''; } catch { return ''; } };
+const gravarToken = t => { try { localStorage.setItem(CHAVE, t); } catch {} mostrarCodigo(); };
+const cab = () => { const t = lerToken(); return t ? { Authorization: 'Bearer ' + t } : {}; };
+
+function mostrarCodigo(){
+  const t = lerToken();
+  $('codigo').textContent = t || 'Você ainda não tem um código. Ele aparece depois da primeira compra.';
+  $('copiarCodigo').style.display = t ? 'inline-block' : 'none';
+}
+$('copiarCodigo').addEventListener('click', () => navigator.clipboard.writeText(lerToken()));
+$('entrar').addEventListener('click', async () => {
+  const t = $('codigoEntrada').value.trim().toLowerCase();
+  if(!/^[a-f0-9]{48}$/.test(t)){ aviso('Código inválido.', true); return; }
+  gravarToken(t);
+  const ok = await atualizarCreditos();
+  aviso(ok ? 'Acesso recuperado.' : 'Código não encontrado.', !ok);
+});
+
+/* ---------- mensagens ---------- */
+function aviso(msg, erro){
+  const s = $('status'); s.style.display = 'block';
+  s.className = erro ? 'erro' : ''; s.textContent = msg;
+}
+
+/* ---------- créditos e pacotes ---------- */
+async function atualizarCreditos(){
+  try{
+    const d = await (await fetch('/api/creditos', { headers: cab() })).json();
+    $('creditos').textContent = d.creditos ?? 0;
+    return !!d.valido;
+  }catch{ return false; }
+}
+
+async function carregarPacotes(){
+  try{
+    const d = await (await fetch('/api/pacotes')).json();
+    maxSegundos = d.maxSegundos || 5;
+    $('maxSeg').textContent = maxSegundos;
+    document.querySelectorAll('.maxSegTxt').forEach(e => e.textContent = maxSegundos);
+    $('pacotes').innerHTML = d.pacotes.map(p => `
+      <div class="card">
+        ${p.destaque ? '<span class="tag">Mais escolhido</span>' : ''}
+        <h3>${p.nome}</h3>
+        <div class="price">R$ ${p.valor.toFixed(2).replace('.', ',')}</div>
+        <ul><li>${p.creditos} vídeo${p.creditos > 1 ? 's' : ''}</li><li>Pagamento por Pix</li></ul>
+        <button class="btn" data-pacote="${p.id}" data-nome="${p.nome}" data-valor="${p.valor}">Comprar</button>
+      </div>`).join('');
+    document.querySelectorAll('[data-pacote]').forEach(b => b.addEventListener('click', () => {
+      pacoteAtual = { id: b.dataset.pacote, nome: b.dataset.nome, valor: Number(b.dataset.valor) };
+      abrirPix();
+    }));
+  }catch{
+    $('pacotes').innerHTML = '<p class="sub">Não foi possível carregar os pacotes. Atualize a página.</p>';
+  }
+}
+
+/* ---------- Pix ---------- */
+function abrirPix(){
+  $('pixTitulo').textContent = `Pacote ${pacoteAtual.nome} — R$ ${pacoteAtual.valor.toFixed(2).replace('.', ',')}`;
+  $('pixPasso1').style.display = 'block';
+  $('pixGerar').style.display = 'inline-block';
+  $('pixArea').innerHTML = '';
+  $('pixDlg').showModal();
+}
+function fecharPix(){ clearInterval(sondaPix); $('pixDlg').close(); }
+$('pixFechar').addEventListener('click', fecharPix);
+
+$('pixGerar').addEventListener('click', async () => {
+  const email = $('email').value.trim();
+  if(!email){ $('pixArea').innerHTML = '<p style="color:var(--warn)">Digite seu e-mail.</p>'; return; }
+  $('pixGerar').disabled = true;
+  $('pixArea').innerHTML = '<p style="color:var(--muted)">Gerando Pix...</p>';
+  try{
+    const r = await fetch('/api/pix', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...cab() },
+      body: JSON.stringify({ email, pacote: pacoteAtual.id }),
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.erro || 'Erro ao gerar o Pix.');
+    gravarToken(d.token);
+    $('pixPasso1').style.display = 'none';
+    $('pixGerar').style.display = 'none';
+    $('pixArea').innerHTML = `
+      ${d.qrBase64 ? `<img class="qrimg" alt="QR Code Pix" src="data:image/png;base64,${d.qrBase64}">` : ''}
+      <div class="qr" id="pixCodigo"></div>
+      <button class="btn small" id="copiarPix">Copiar código Pix</button>
+      <p style="color:var(--muted);margin-top:10px;font-size:.9rem" id="pixMsg">Aguardando o pagamento... os créditos entram sozinhos.</p>`;
+    $('pixCodigo').textContent = d.copiaECola;
+    $('copiarPix').addEventListener('click', () => navigator.clipboard.writeText(d.copiaECola));
+    aguardarPagamento();
+  }catch(e){
+    $('pixArea').innerHTML = `<p style="color:var(--err)">${e.message}</p>`;
+  }finally{
+    $('pixGerar').disabled = false;
+  }
+});
+
+async function aguardarPagamento(){
+  const antes = Number($('creditos').textContent) || 0;
+  let tentativas = 0;
+  clearInterval(sondaPix);
+  sondaPix = setInterval(async () => {
+    tentativas++;
+    await atualizarCreditos();
+    if((Number($('creditos').textContent) || 0) > antes){
+      clearInterval(sondaPix);
+      $('pixMsg').style.color = 'var(--ok)';
+      $('pixMsg').textContent = 'Pagamento confirmado! Créditos adicionados.';
+      setTimeout(fecharPix, 2000);
+    }
+    if(tentativas > 150) clearInterval(sondaPix); // para depois de ~10 minutos
+  }, 4000);
+}
+
+/* ---------- pré-visualização e validação ---------- */
+function prev(input, box, tipo){
+  input.addEventListener('change', () => {
+    const f = input.files[0]; if(!f){ box.innerHTML = ''; return; }
+    const url = URL.createObjectURL(f);
+    if(tipo === 'img'){ box.innerHTML = `<img src="${url}">`; return; }
+    box.innerHTML = `<video src="${url}" controls></video>`;
+    const v = box.querySelector('video');
+    v.addEventListener('loadedmetadata', () => {
+      if(v.duration > maxSegundos + 0.5){
+        aviso(`Esse vídeo tem ${v.duration.toFixed(1)}s. O máximo é ${maxSegundos}s. Corte o vídeo e envie de novo.`, true);
+        input.value = ''; box.innerHTML = '';
+      }
+    });
+  });
+}
+prev($('img'), $('imgPrev'), 'img');
+prev($('vid'), $('vidPrev'), 'vid');
+
+/* ---------- gerar vídeo ---------- */
+const esperar = ms => new Promise(r => setTimeout(r, ms));
+
+$('gerar').addEventListener('click', async () => {
+  const token = lerToken();
+  const img = $('img').files[0], vid = $('vid').files[0];
+  if(!token){ aviso('Compre um pacote de créditos para começar.', true); document.getElementById('planos').scrollIntoView(); return; }
+  if(!img || !vid){ aviso('Envie a imagem e o vídeo de referência.', true); return; }
+  if(Number($('creditos').textContent) < 1){ aviso('Você não tem créditos. Compre um pacote.', true); document.getElementById('planos').scrollIntoView(); return; }
+
+  $('gerar').disabled = true;
+  $('result').innerHTML = '';
+  try{
+    aviso('Enviando arquivos...');
+    const opcoes = { access: 'public', handleUploadUrl: '/api/upload', clientPayload: token };
+    const [imgBlob, vidBlob] = await Promise.all([
+      upload('imagem-' + img.name, img, opcoes),
+      upload('video-' + vid.name, vid, opcoes),
+    ]);
+
+    aviso('Iniciando a geração...');
+    const r = await fetch('/api/gerar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...cab() },
+      body: JSON.stringify({ imageUrl: imgBlob.url, videoUrl: vidBlob.url }),
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.erro || 'Erro ao gerar.');
+    $('creditos').textContent = d.creditos;
+
+    aviso('Gerando seu vídeo... isso leva alguns minutos. Não feche a página.');
+    const limite = Date.now() + 15 * 60 * 1000;
+    while(Date.now() < limite){
+      await esperar(5000);
+      const s = await (await fetch('/api/status?id=' + encodeURIComponent(d.requestId), { headers: cab() })).json();
+      if(s.status === 'pronto'){
+        $('status').style.display = 'none';
+        $('result').innerHTML = `<video src="${s.url}" controls playsinline></video>
+          <p style="margin-top:10px"><a class="btn" href="${s.url}" target="_blank" rel="noopener" download>Baixar vídeo</a></p>
+          <p class="sub" style="margin-top:8px">Baixe agora e guarde o arquivo.</p>`;
+        return;
+      }
+      if(s.status === 'erro'){ aviso(s.erro, true); await atualizarCreditos(); return; }
+    }
+    aviso('Está demorando mais que o normal. Seu pedido continua na fila; se falhar, o crédito é devolvido.', true);
+  }catch(e){
+    aviso('Não foi possível gerar: ' + e.message, true);
+    atualizarCreditos();
+  }finally{
+    $('gerar').disabled = false;
+  }
+});
+
+mostrarCodigo();
+carregarPacotes();
+atualizarCreditos();
+</script>
+</body>
+</html>
